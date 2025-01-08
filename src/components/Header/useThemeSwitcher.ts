@@ -25,5 +25,4 @@ export const useThemeSwitcher = () => {
     }, [isDarkMode])
 
     return { toggleTheme, isDarkMode }
-
 }

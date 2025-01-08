@@ -11,3 +11,8 @@ body.light {
     background-color: black;
     color: white;
   }
+
+  .button.light {
+    background-color: blue;
+    color: red;
+  }

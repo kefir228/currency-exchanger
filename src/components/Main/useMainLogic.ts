@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import { useErrorBoundary } from "../../Providers/errorBoundary"
 
 interface InputForm {
     amountFrom: number
@@ -17,6 +18,7 @@ interface ExchangeRate {
 
 export const useMain = () => {
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<InputForm>()
+    const { componentDidCatch } = useErrorBoundary()
     const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({})
     const currencies = ["UAH", "USD", "EUR", "PLN", "GBP"]
     const currenceCodes: Record<string, number> = {
@@ -27,14 +29,10 @@ export const useMain = () => {
         GBP: 826,
     }
 
-    const handleClearInputs = () => {
-
-    }
-
     useEffect(() => {
         const fetchRates = async () => {
             const LOCAL_STORAGE_KEY = "exchangeRates"
-            const CACHE_TIMEOUT = 5 * 60 * 1000
+            const CACHE_TIMEOUT = 30 * 60 * 1000
 
             try {
                 const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY)
@@ -75,11 +73,12 @@ export const useMain = () => {
                 )
             } catch (error) {
                 console.error("Error fetching exchange rates:", error)
+                componentDidCatch(error,{componentStack:'useMain'})
             }
         }
 
         fetchRates()
-    }, [])
+    }, [componentDidCatch])
 
     const amountFrom = watch("amountFrom")
     const currencyFrom = watch("currencyFrom", "UAH")
@@ -100,6 +99,10 @@ export const useMain = () => {
 
     const onSubmit = (data: InputForm) => {
         console.log("Converted data", data)
+        setValue('amountFrom', 0)
+        setValue('amountTo', 0)
+        setValue('currencyFrom', 'UAH')
+        setValue('currencyTo', 'USD')
     }
 
     return { register, handleSubmit, onSubmit, errors, currencies, exchangeRates }

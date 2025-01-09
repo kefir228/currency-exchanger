@@ -1,10 +1,8 @@
 import { useMain } from "./useMainLogic"
-import { useThemeSwitcher } from "../Header/useThemeSwitcher"
 
 export const MainPart = () => {
     const { register, handleSubmit, onSubmit, errors, currencies } = useMain()
-    const { isDarkMode } = useThemeSwitcher()
-
+    
     return (
         <div className="w-100%">
             <h1 style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }} className="flex justify-center font-bold p-5">
@@ -70,7 +68,8 @@ export const MainPart = () => {
 
                 <button
                     type="submit"
-                    className={`${isDarkMode ? 'text-white' : 'text-black'}  font-bold py-2 px-4 rounded ${isDarkMode ? 'bg-gray-800' : 'bg-blue-500'}`}
+                    className='font-bold py-2 px-4 rounded'
+                    onSubmit={handleSubmit(onSubmit)}
                 >
                     Convert
                 </button>

@@ -45,7 +45,7 @@ export const Header = () => {
                 </div>
             </div>
             <button
-                className='absolute top-0 right-0 text-3xl'
+                className='absolute top-0 right-0 text-3xl !bg-inherit'
                 onClick={toggleTheme}
                 aria-label='Toggle theme'
             >

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useErrorBoundary } from "../../Providers/errorBoundary"
 
 type CurrencyRate = {
     currency: string
@@ -8,10 +9,11 @@ type CurrencyRate = {
 
 export const useHeader = () => {
     const [rates, setRates] = useState<CurrencyRate[]>([])
+    const {componentDidCatch} = useErrorBoundary()
 
     useEffect(() => {
         const LOCAL_STORAGE_KEY = 'currencyRates'
-        const CACHE_TIMEOUT = 5 * 60 * 1000
+        const CACHE_TIMEOUT = 30 * 60 * 1000
 
         const fetchRates = async () => {
             try {
@@ -37,6 +39,7 @@ export const useHeader = () => {
                 setRates(filteredRates)
             } catch (error) {
                 console.error("Помилка отримання курсу валют:", error);
+                componentDidCatch(error,{componentStack:'useHeader'})
             }
         }
 

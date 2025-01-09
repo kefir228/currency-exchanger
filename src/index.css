@@ -12,7 +12,12 @@ body.light {
     color: white;
   }
 
-  .button.light {
-    background-color: blue;
-    color: red;
-  }
+  body.light button {
+    background-color: #3b82f6; 
+    color: black; 
+}
+
+body.dark button {
+    background-color: #1f2937; 
+    color: white; 
+}

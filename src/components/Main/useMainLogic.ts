@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useErrorBoundary } from "../../Providers/errorBoundary"
+import { fetchExchangeRates, ExchangeRate } from "../api.monobank"
 
 interface InputForm {
     amountFrom: number
     currencyFrom: string
     amountTo: number
     currencyTo: string
-}
-
-interface ExchangeRate {
-    currencyCodeA: number
-    currencyCodeB: number
-    rateBuy: number
-    rateSell: number
 }
 
 export const useMain = () => {
@@ -28,52 +22,30 @@ export const useMain = () => {
         PLN: 985,
         GBP: 826,
     }
-
+    
     useEffect(() => {
         const fetchRates = async () => {
-            const LOCAL_STORAGE_KEY = "exchangeRates"
-            const CACHE_TIMEOUT = 30 * 60 * 1000
 
             try {
-                const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY)
-                if (cachedData) {
-                    const { rates: cachedRates, timestamp } = JSON.parse(cachedData)
-                    if (Date.now() - timestamp < CACHE_TIMEOUT) {
-                        setExchangeRates(cachedRates)
-                        return
-                    }
-                }
-
-                const response = await fetch("https://api.monobank.ua/bank/currency")
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`)
-                }
-
-                const data: ExchangeRate[] = await response.json()
-                if (!Array.isArray(data)) {
-                    throw new Error("Unexpected API response format")
-                }
-
+                const data = await fetchExchangeRates()
                 const rates: Record<string, number> = {}
+                
                 data.forEach((rate) => {
-                    const currency = Object.keys(currenceCodes).find(
+                    const currencyA = Object.keys(currenceCodes).find(
                         (key) => currenceCodes[key] === rate.currencyCodeA
                     )
-                    if (currency && rate.currencyCodeB === currenceCodes.UAH) {
-                        rates[currency] = rate.rateBuy
+
+                    if (currencyA && rate.currencyCodeB === currenceCodes.UAH) {
+                        rates[currencyA] = rate.rateBuy || rate.rateCross;
                     }
                 })
 
                 const finalRates = { UAH: 1, ...rates }
                 setExchangeRates(finalRates)
 
-                localStorage.setItem(
-                    LOCAL_STORAGE_KEY,
-                    JSON.stringify({ rates: finalRates, timestamp: Date.now() })
-                )
             } catch (error) {
                 console.error("Error fetching exchange rates:", error)
-                componentDidCatch(error,{componentStack:'useMain'})
+                componentDidCatch(error, { componentStack: 'useMain' })
             }
         }
 
@@ -92,7 +64,7 @@ export const useMain = () => {
             exchangeRates[currencyFrom] &&
             exchangeRates[currencyTo]
         ) {
-            const convertedAmount = (amountFrom / exchangeRates[currencyFrom]) * exchangeRates[currencyTo]
+            const convertedAmount = (amountFrom * exchangeRates[currencyFrom]) / exchangeRates[currencyTo]
             setValue("amountTo", parseFloat(convertedAmount.toFixed(2)))
         }
     }, [amountFrom, currencyFrom, currencyTo, exchangeRates, setValue])

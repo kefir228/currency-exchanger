@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useErrorBoundary } from "../../Providers/errorBoundary"
+import { fetchExchangeRates, ExchangeRate } from "../api.monobank"
 
 type CurrencyRate = {
     currency: string
@@ -12,16 +13,10 @@ export const useHeader = () => {
     const {componentDidCatch} = useErrorBoundary()
 
     useEffect(() => {
-        const LOCAL_STORAGE_KEY = 'currencyRates'
-        const CACHE_TIMEOUT = 30 * 60 * 1000
 
         const fetchRates = async () => {
             try {
-                const response = await fetch("https://api.monobank.ua/bank/currency")
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`)
-                }
-                const data = await response.json()
+                const data = await fetchExchangeRates()
 
                 const filteredRates = data
                     .filter(
@@ -34,8 +29,6 @@ export const useHeader = () => {
                         rateSell: item.rateSell
                     }))
 
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ rates: filteredRates, timestamp: Date.now() }))
-
                 setRates(filteredRates)
             } catch (error) {
                 console.error("Помилка отримання курсу валют:", error);
@@ -43,18 +36,8 @@ export const useHeader = () => {
             }
         }
 
-        const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY)
-        if (cachedData) {
-            const { rates: cachedRates, timestamp } = JSON.parse(cachedData)
-
-            if (Date.now() - timestamp < CACHE_TIMEOUT) {
-                setRates(cachedRates)
-                return
-            }                              
-        }
-
         fetchRates()
-    }, [])
+    }, [componentDidCatch])
 
     const usd = rates.find((rate) => rate.currency === 'USD')
     const eur = rates.find((rate) => rate.currency === 'EUR')

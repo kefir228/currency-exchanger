@@ -25,7 +25,7 @@ export const MainPart = () => {
                         <select
                             style={{ color: 'black' }}
                             className="border p-2 rounded"
-                            {...register("currencyTo", { required: true })}
+                            {...register("currencyFrom", { required: true })}
                             defaultValue="UAH"
                         >
                             {currencies.map((currency) => (
@@ -54,7 +54,7 @@ export const MainPart = () => {
                         <select
                             style={{ color: 'black' }}
                             className="border p-2 rounded"
-                            {...register("currencyFrom", { required: true })}
+                            {...register("currencyTo", { required: true })}
                             defaultValue="USD"
                         >
                             {currencies.map((currency) => (

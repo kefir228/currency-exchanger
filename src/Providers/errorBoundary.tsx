@@ -28,16 +28,21 @@ export const ErrorBoundaryProvider = ({ children }: { children: React.ReactNode 
 
     if (error) {
         return (
-            <div className="error-boundary">
-                <h1>Something went wrong.</h1>
-                <p>{error.message}</p>
-                <button onClick={resetError}>Try Again</button>
+            <div className="flex flex-col w-full h-screen items-center justify-center gap-10">
+                <h1 className="w-full text-6xl font-medium text-center">Something went wrong.</h1>
+                <p className="text-center">{error.message}</p>
+                <button
+                    className="bg-blue-500 hover:bg-blue-800 rounded w-1/2 flex justify-center "
+                    onClick={resetError}
+                >
+                    Try Again
+                </button>
             </div>
         )
     }
 
     return (
-        <ErrorBoundaryContext.Provider value={{componentDidCatch}}>
+        <ErrorBoundaryContext.Provider value={{ componentDidCatch }}>
             {children}
         </ErrorBoundaryContext.Provider>
     )

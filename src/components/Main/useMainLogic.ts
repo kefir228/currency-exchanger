@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useErrorBoundary } from "../../Providers/errorBoundary"
-import { fetchExchangeRates, ExchangeRate } from "../api.monobank"
+import { fetchExchangeRates } from "../api.monobank"
 
 interface InputForm {
     amountFrom: number

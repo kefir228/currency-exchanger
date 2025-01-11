@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useErrorBoundary } from "../../Providers/errorBoundary"
-import { fetchExchangeRates, ExchangeRate } from "../api.monobank"
+import { fetchExchangeRates } from "../api.monobank"
 
 type CurrencyRate = {
     currency: string

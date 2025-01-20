@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useErrorBoundary } from "../../Providers/errorBoundary"
 import { fetchExchangeRates } from "../api.monobank"
@@ -11,7 +11,7 @@ interface InputForm {
 }
 
 export const useMain = () => {
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<InputForm>()
+    const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<InputForm>()
     const { componentDidCatch } = useErrorBoundary()
     const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({})
     const currencies = ["UAH", "USD", "EUR", "PLN", "GBP"]
@@ -22,35 +22,34 @@ export const useMain = () => {
         PLN: 985,
         GBP: 826,
     }
-    
-    useEffect(() => {
-        const fetchRates = async () => {
 
-            try {
-                const data = await fetchExchangeRates()
-                const rates: Record<string, number> = {}
-                
-                data.forEach((rate) => {
-                    const currencyA = Object.keys(currenceCodes).find(
-                        (key) => currenceCodes[key] === rate.currencyCodeA
-                    )
+    const fetchRates = useCallback(async () => {
+        try {
+            const data = await fetchExchangeRates()
+            const rates: Record<string, number> = {}
 
-                    if (currencyA && rate.currencyCodeB === currenceCodes.UAH) {
-                        rates[currencyA] = rate.rateBuy || rate.rateCross;
-                    }
-                })
+            data.forEach((rate) => {
+                const currencyA = Object.keys(currenceCodes).find(
+                    (key) => currenceCodes[key] === rate.currencyCodeA
+                )
 
-                const finalRates = { UAH: 1, ...rates }
-                setExchangeRates(finalRates)
+                if (currencyA && rate.currencyCodeB === currenceCodes.UAH) {
+                    rates[currencyA] = rate.rateBuy || rate.rateCross;
+                }
+            })
 
-            } catch (error) {
-                console.error("Error fetching exchange rates:", error)
-                componentDidCatch(error, { componentStack: 'useMain' })
-            }
+            const finalRates = { UAH: 1, ...rates }
+            setExchangeRates(finalRates)
+
+        } catch (error) {
+            console.error("Error fetching exchange rates:", error)
+            componentDidCatch(error, { componentStack: 'useMain' })
         }
-
-        fetchRates()
     }, [componentDidCatch])
+
+    useEffect(() => {
+        fetchRates()
+    },[fetchRates])
 
     const amountFrom = watch("amountFrom")
     const currencyFrom = watch("currencyFrom", "UAH")
@@ -71,10 +70,7 @@ export const useMain = () => {
 
     const onSubmit = (data: InputForm) => {
         console.log("Converted data", data)
-        setValue('amountFrom', 0)
-        setValue('amountTo', 0)
-        setValue('currencyFrom', 'UAH')
-        setValue('currencyTo', 'USD')
+        reset()
     }
 
     return { register, handleSubmit, onSubmit, errors, currencies, exchangeRates }
